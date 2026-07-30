@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink text-paper font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  ::selection {
+    @apply bg-saffron text-black;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-ink;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-rule-2 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-smoke;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-smoke;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-1 ring-saffron ring-offset-0;
+  }
+}
+
+@layer components {
+  .kicker {
+    @apply font-mono text-[10px] uppercase tracking-[0.14em] text-saffron;
+  }
+
+  .card {
+    @apply rounded-card border border-rule bg-ink-2;
+  }
+
+  .liquid-glass {
+    background: rgba(20, 20, 18, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: border-color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  }
+
+  .liquid-glass:hover {
+    border-color: rgba(255, 107, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -10px rgba(255, 107, 0, 0.12);
+  }
+}

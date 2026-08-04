@@ -1,0 +1,45 @@
+# LoRA fine-tune tuned for a Google Colab FREE T4 (16GB).
+#
+# Differences from whisper_ml_lora.yaml, and why each one is forced:
+#
+#   bf16 -> fp16          The T4 is Turing (sm_75) and has NO bfloat16 support.
+#                         Setting bf16 on a T4 either errors or silently falls
+#                         back to fp32 and OOMs.
+#   batch 8 -> 2          Whisper-medium LoRA in fp16 peaks around 11-13GB at
+#                         batch 2. Batch 4 fits sometimes and OOMs when the
+#                         dataloader hits a run of long utterances.
+#   grad accum 2 -> 8     Keeps the effective batch at 16, so the optimiser sees
+#                         the same thing as the A100 config. Do not drop this or
+#                         the learning rate below becomes wrong.
+#   save_steps 400 -> 200 Colab disconnects. Checkpoint often enough that losing
+#                         a session costs minutes, not hours.
+#
+# On Colab Pro with an A100/L4, use the standard config instead — it is faster.
+
+base_model: openai/whisper-medium
+language: ml
+task: transcribe
+
+lora_r: 32
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules: [q_proj, v_proj]
+
+train_manifest: data/manifests/train.jsonl
+eval_manifest: data/manifests/sondanote_eval.jsonl
+max_duration_s: 30.0
+min_duration_s: 0.5
+
+epochs: 3
+per_device_batch_size: 2
+gradient_accumulation_steps: 8    # effective batch 16, same as the A100 config
+learning_rate: 0.001
+warmup_steps: 200
+gradient_checkpointing: true      # mandatory at 16GB; costs ~30% throughput
+bf16: false                       # T4 cannot do bf16
+fp16: true
+
+output_dir: /content/drive/MyDrive/sondanote-asr/whisper-ml-lora
+eval_steps: 200
+save_steps: 200                   # frequent: sessions die without warning
+logging_steps: 25

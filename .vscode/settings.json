@@ -1,0 +1,10 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/api/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/apps/api"
+  ],
+  "python.analysis.pythonPath": "${workspaceFolder}/apps/api/.venv/bin/python",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
+}

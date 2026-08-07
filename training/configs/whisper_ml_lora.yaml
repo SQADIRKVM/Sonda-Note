@@ -1,0 +1,35 @@
+# LoRA fine-tune: Whisper medium -> Malayalam
+#
+# Starting point, not a tuned recipe. Run --dry-run first to see the cost
+# estimate, and always score against your own eval set before and after.
+
+base_model: openai/whisper-medium
+language: ml
+task: transcribe
+
+# r=32 is higher than the usual 8/16 on purpose: Malayalam is far from Whisper's
+# pretraining distribution, so the adapter needs more capacity than a typical
+# in-domain English task.
+lora_r: 32
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules: [q_proj, v_proj]
+
+train_manifest: data/manifests/train.jsonl
+eval_manifest: data/manifests/sondanote_eval.jsonl
+max_duration_s: 30.0
+min_duration_s: 0.5
+
+# 2-3 epochs is the consistent convention across published Whisper fine-tunes.
+# More overfits, especially on a narrow domain.
+epochs: 3
+per_device_batch_size: 8
+gradient_accumulation_steps: 2
+learning_rate: 0.001        # LoRA tolerates ~100x the LR of full fine-tuning
+warmup_steps: 200
+gradient_checkpointing: true
+bf16: true                  # A100/H100. Use fp16 only on older cards.
+
+output_dir: output/whisper-ml-lora
+eval_steps: 200
+save_steps: 400

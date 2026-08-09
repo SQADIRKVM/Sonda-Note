@@ -150,19 +150,19 @@ Start the FastAPI dev server:
 
 To run Whisper Large V3 & Qwen 2.5:7b on free GPU hardware:
 
-1. Open [`Sonda Note_GPU_Inference_Server.ipynb`](file:///Users/sarhanqadir/Downloads/meet-ai/Sonda Note_GPU_Inference_Server.ipynb) in **Google Colab**.
+1. Open [`Sondanote_GPU_Inference_Server.ipynb`](file:///Users/sarhanqadir/Downloads/meet-ai/Sondanote_GPU_Inference_Server.ipynb) in **Google Colab**.
 2. Go to **Runtime → Change runtime type → T4 GPU**.
 3. Click **Runtime → Run all**.
 4. Copy the live tunnel URL printed at the end of Cell 4:
    ```text
    ========================================================
      🚀 SONDANOTE GPU SERVER IS LIVE!
-     URL: https://savannah-marathon-chart-lion.trycloudflare.com
+     URL: https://your-tunnel-id.trycloudflare.com
    ========================================================
    ```
 5. Update `apps/api/.env`:
    ```env
-   COLAB_GPU_URL=https://savannah-marathon-chart-lion.trycloudflare.com
+   COLAB_GPU_URL=https://your-tunnel-id.trycloudflare.com
    ASR_PROVIDER=colab
    LLM_PROVIDER=colab
    ```

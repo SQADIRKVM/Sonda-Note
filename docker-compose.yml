@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # ─── FastAPI Python Backend ───
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: sondanote-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - ASR_PROVIDER=${ASR_PROVIDER:-colab}
+      - LLM_PROVIDER=${LLM_PROVIDER:-colab}
+      - COLAB_GPU_URL=${COLAB_GPU_URL:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - sondanote_data:/app/data
+
+  # ─── Next.js Web Dashboard ───
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: sondanote-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8000
+    depends_on:
+      - api
+
+volumes:
+  sondanote_data:
+    driver: local

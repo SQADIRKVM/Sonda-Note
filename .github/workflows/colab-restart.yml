@@ -1,0 +1,39 @@
+name: Auto-Restart Colab Session & Update Tunnel URL
+
+on:
+  schedule:
+    # Run every 6 hours to restart Colab session before 12h maximum runtime limit
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  restart-colab-session:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright & Dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Run Colab Auto-Launcher
+        env:
+          COLAB_NOTEBOOK_URL: ${{ secrets.COLAB_NOTEBOOK_URL }}
+          GOOGLE_COOKIES_JSON: ${{ secrets.GOOGLE_COOKIES_JSON }}
+        run: |
+          python scripts/colab_auto_launcher.py
+
+      - name: Report Active Tunnel URL
+        if: env.NEW_COLAB_URL != ''
+        run: |
+          echo "========================================================"
+          echo "  🚀 SONDANOTE GPU RESTART SUCCESSFUL!"
+          echo "  NEW URL: ${{ env.NEW_COLAB_URL }}"
+          echo "========================================================"

@@ -1,0 +1,34 @@
+name: Colab GPU Server Keep-Alive & Health Check
+
+on:
+  schedule:
+    # Run every 15 minutes to prevent Google Colab idle timeout
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-colab-gpu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ping Colab GPU Server
+        env:
+          COLAB_GPU_URL: ${{ secrets.COLAB_GPU_URL }}
+        run: |
+          if [ -z "$COLAB_GPU_URL" ]; then
+            echo "::warning title=COLAB_GPU_URL Not Set::Please set COLAB_GPU_URL in GitHub Repository Secrets."
+            exit 0
+          fi
+          
+          echo "Pinging live GPU server at: $COLAB_GPU_URL/health"
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$COLAB_GPU_URL/health" || echo "000")
+          
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "✅ Colab GPU Server is LIVE and healthy (HTTP 200)."
+          else
+            echo "❌ Colab GPU Server failed or timed out (HTTP Status: $RESPONSE)."
+            echo "::error title=Colab GPU Down::Colab session disconnected or tunnel expired. Please restart the notebook."
+            exit 1
+          fi

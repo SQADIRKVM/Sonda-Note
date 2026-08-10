@@ -1,12 +1,10 @@
 /**
- * Content script on Google Meet — a floating record pill.
+ * Content script on Google Meet — floating record pill.
  *
- * Purpose is convenience only: the popup can do everything this does. It exists
- * because reaching for the toolbar mid-call is friction, and the moment a user
- * wants to record is the moment the call starts.
- *
- * All privileged work stays in the service worker; this script only sends
- * messages. It never touches audio.
+ * Designed to match Sonda Note's warm paper design system:
+ * - Warm paper pill background (#FFFDF8)
+ * - Hairline border (#E4E1D8) with hover accent (#5F6E24)
+ * - Georgia serif display typography & clean badges
  */
 
 import type { PlasmoCSConfig } from "plasmo";
@@ -34,8 +32,6 @@ function mount(): void {
   host.id = HOST_ID;
   host.style.cssText =
     "position:fixed;bottom:96px;right:20px;z-index:2147483000;pointer-events:auto;";
-  // Shadow DOM so Meet's stylesheet cannot restyle the pill and ours cannot
-  // leak into Meet's UI.
   shadow = host.attachShadow({ mode: "closed" });
   document.body.appendChild(host);
 
@@ -43,17 +39,17 @@ function mount(): void {
   style.textContent = `
     .pill {
       display:flex; align-items:center; gap:9px;
-      background:#0C0C0A; border:1px solid #2E2E28; border-radius:999px;
-      padding:9px 15px; cursor:pointer; user-select:none;
-      font-family:'Space Grotesk',system-ui,sans-serif; font-size:12px; font-weight:600;
-      color:#F0EFE6; box-shadow:0 6px 22px rgba(0,0,0,.45);
-      transition:border-color .18s, transform .18s;
+      background:#FFFDF8; border:1px solid #E4E1D8; border-radius:999px;
+      padding:10px 18px; cursor:pointer; user-select:none;
+      font-family:system-ui,-apple-system,sans-serif; font-size:13px; font-weight:500;
+      color:#191A14; box-shadow:0 4px 20px rgba(25,26,20,.12);
+      transition:border-color .18s, transform .18s, background-color .18s;
     }
-    .pill:hover { border-color:#FF6B00; transform:translateY(-1px); }
+    .pill:hover { border-color:#5F6E24; transform:translateY(-1px); background:#F7F4EE; }
     .pill[data-disabled="true"] { opacity:.5; cursor:default; transform:none; }
-    .dot { width:8px; height:8px; border-radius:50%; background:#FF6B00; flex:none; }
-    .dot.rec { background:#E17055; animation:p 1.4s ease-in-out infinite; }
-    .time { font-family:'JetBrains Mono',monospace; font-size:11px; color:#8C8C78; }
+    .dot { width:8px; height:8px; border-radius:50%; background:#5F6E24; flex:none; }
+    .dot.rec { background:#B0392B; animation:p 1.4s ease-in-out infinite; }
+    .time { font-family:'JetBrains Mono',monospace; font-size:12px; color:#6B6E63; }
     @keyframes p { 0%,100%{opacity:1} 50%{opacity:.3} }
   `;
   shadow.appendChild(style);
@@ -72,7 +68,6 @@ async function getStatus(): Promise<PopupStatus | null> {
   try {
     return (await chrome.runtime.sendMessage({ type: "GET_STATUS" })) as PopupStatus;
   } catch {
-    // Service worker asleep or extension reloaded — leave the last render up.
     return null;
   }
 }
@@ -134,7 +129,6 @@ function formatDuration(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-// Meet is a SPA: the pill must survive route changes into and out of a call.
 if (document.body) {
   mount();
 } else {

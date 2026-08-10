@@ -47,9 +47,11 @@ export interface ExtensionSettings {
   template: string;
 }
 
+declare const process: { env?: Record<string, string | undefined> } | undefined;
+
 export const DEFAULT_SETTINGS: ExtensionSettings = {
-  apiBaseUrl: process.env.PLASMO_PUBLIC_API_URL || "http://localhost:8000",
-  dashboardUrl: process.env.PLASMO_PUBLIC_DASHBOARD_URL || "http://localhost:3000",
+  apiBaseUrl: (typeof process !== "undefined" && process?.env?.PLASMO_PUBLIC_API_URL) || "http://localhost:8000",
+  dashboardUrl: (typeof process !== "undefined" && process?.env?.PLASMO_PUBLIC_DASHBOARD_URL) || "http://localhost:3000",
   includeMic: true,
   chunkMs: 30_000,
   autoSummarise: true,

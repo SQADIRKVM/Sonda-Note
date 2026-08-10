@@ -1,9 +1,11 @@
 /**
- * Popup UI — the extension's only visible surface.
+ * Popup UI — Chrome extension popup.
  *
- * Styling is inline rather than Tailwind: the popup is one small component and
- * inlining keeps the extension bundle free of a CSS build step. The design tokens
- * mirror the product spec's palette (saffron on near-black).
+ * Designed to seamlessly match Sonda Note's warm paper design system:
+ * - Warm cream canvas (#F6F2EA) & paper cards (#FFFDF8)
+ * - 1px hairline rules (#E4E1D8)
+ * - Solid dark inversion CTA button (#191A14)
+ * - Georgia display wordmark ("Sonda.")
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -11,29 +13,21 @@ import { useCallback, useEffect, useState } from "react";
 import type { PopupRequest, PopupStatus } from "./lib/types";
 
 const T = {
-  ink: "#0C0C0A",
-  ink2: "#141410",
-  ink3: "#1C1C18",
-  rule: "#2E2E28",
-  rule2: "#3A3A32",
-  smoke: "#5C5C50",
-  ash: "#8C8C78",
-  paper: "#D4D4C0",
-  cream: "#F0EFE6",
-  saffron: "#FF6B00",
-  kerala: "#00B894",
-  rose: "#E17055",
+  canvas: "#F6F2EA",
+  paper: "#FFFDF8",
+  ink: "#191A14",
+  ink2: "#4F5248",
+  ink3: "#6B6E63",
+  rule: "#E4E1D8",
+  rule2: "#CFCBBF",
+  olive: "#5F6E24",
+  live: "#2F7D6A",
+  rose: "#B0392B",
   mono: "'JetBrains Mono', ui-monospace, monospace",
-  sans: "'Space Grotesk', system-ui, sans-serif",
+  sans: "system-ui, -apple-system, sans-serif",
+  display: 'Georgia, "Iowan Old Style", serif',
 };
 
-/**
- * Send a message to the service worker, with a timeout.
- *
- * MV3 service workers are terminated when idle and can fail to respond if they
- * throw while waking. Without a timeout the popup would sit on "Loading…"
- * forever with nothing to explain why.
- */
 function send<T = unknown>(request: PopupRequest, timeoutMs = 4000): Promise<T> {
   return Promise.race([
     chrome.runtime.sendMessage(request) as Promise<T>,
@@ -48,7 +42,6 @@ export default function Popup() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
-
   const [loadFailed, setLoadFailed] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -57,22 +50,17 @@ export default function Popup() {
       setLoadFailed(false);
       setActionError(null);
     } catch {
-      // Keep any status already on screen; only show the failure state when we
-      // have nothing at all to render.
       setLoadFailed(true);
     }
   }, []);
 
   useEffect(() => {
     void refresh();
-    // Poll rather than subscribe: the service worker may be asleep, and a
-    // 1s poll is cheap for a popup that is only open while the user looks at it.
     const interval = setInterval(refresh, 1000);
     return () => clearInterval(interval);
   }, [refresh]);
 
   useEffect(() => {
-    // If opened with ?grant_mic=1 in a full tab, prompt for microphone permission
     if (window.location.search.includes("grant_mic=1")) {
       navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -86,7 +74,6 @@ export default function Popup() {
     }
   }, []);
 
-  // Elapsed timer — ticks every second while recording
   useEffect(() => {
     if (status?.state !== "recording" || !status.session) {
       setElapsed(0);
@@ -107,7 +94,6 @@ export default function Popup() {
     setBusy(true);
     setActionError(null);
 
-    // Request microphone permission on user interaction so Chrome grants mic access to the extension
     if (status?.settings.includeMic) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -165,11 +151,8 @@ export default function Popup() {
     return (
       <Shell>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: 17, fontWeight: 700, color: T.cream }}>
-            Sonda Note
-            <sup style={{ fontFamily: T.mono, fontSize: 7, color: T.saffron, marginLeft: 3 }}>
-              MEET AI
-            </sup>
+          <div style={{ fontFamily: T.display, fontSize: 18, fontWeight: 400, color: T.ink }}>
+            Sonda<span style={{ color: T.olive }}>.</span>
           </div>
         </div>
         <Divider />
@@ -184,7 +167,7 @@ export default function Popup() {
             </Button>
           </>
         ) : (
-          <div style={{ color: T.smoke, fontFamily: T.mono, fontSize: 11 }}>Loading…</div>
+          <div style={{ color: T.ink3, fontFamily: T.sans, fontSize: 12 }}>Loading…</div>
         )}
       </Shell>
     );
@@ -199,11 +182,8 @@ export default function Popup() {
     <Shell>
       {/* header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: 17, fontWeight: 700, color: T.cream, letterSpacing: "-0.02em" }}>
-          Sonda Note
-          <sup style={{ fontFamily: T.mono, fontSize: 7, color: T.saffron, marginLeft: 3, letterSpacing: "0.08em" }}>
-            MEET AI
-          </sup>
+        <div style={{ fontFamily: T.display, fontSize: 19, fontWeight: 400, color: T.ink }}>
+          Sonda<span style={{ color: T.olive }}>.</span>
         </div>
         <StatusPill state={status.state} />
       </div>
@@ -213,7 +193,7 @@ export default function Popup() {
       {/* not signed in */}
       {!status.auth.signedIn && (
         <>
-          <p style={{ fontSize: 12, color: T.ash, lineHeight: 1.7, margin: "4px 0 12px" }}>
+          <p style={{ fontSize: 12, color: T.ink2, lineHeight: 1.6, margin: "4px 0 12px" }}>
             Sign in on the Sonda Note dashboard to link this extension to your workspace.
           </p>
           <Button onClick={openDashboard} variant="primary">
@@ -225,16 +205,16 @@ export default function Popup() {
       {/* signed in */}
       {status.auth.signedIn && (
         <>
-          <div style={{ fontFamily: T.mono, fontSize: 10, color: T.smoke, letterSpacing: "0.04em", marginBottom: 12 }}>
+          <div style={{ fontFamily: T.sans, fontSize: 11, color: T.ink3, marginBottom: 12 }}>
             {status.auth.workspaceName || status.auth.email || "workspace linked"}
           </div>
 
           {recording && status.session && (
             <div
               style={{
-                background: T.ink3,
+                background: T.paper,
                 border: `1px solid ${T.rule}`,
-                borderRadius: 4,
+                borderRadius: 10,
                 padding: "12px 14px",
                 marginBottom: 12,
               }}
@@ -242,18 +222,18 @@ export default function Popup() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <span
                   style={{
-                    width: 7,
-                    height: 7,
+                    width: 8,
+                    height: 8,
                     borderRadius: "50%",
                     background: T.rose,
                     animation: "sondanotePulse 1.4s ease-in-out infinite",
                   }}
                 />
-                <span style={{ fontFamily: T.mono, fontSize: 16, color: T.cream, letterSpacing: "0.04em" }}>
+                <span style={{ fontFamily: T.mono, fontSize: 16, color: T.ink, fontWeight: 600 }}>
                   {formatDuration(elapsed)}
                 </span>
               </div>
-              <div style={{ fontFamily: T.mono, fontSize: 10, color: T.smoke, lineHeight: 1.7 }}>
+              <div style={{ fontFamily: T.sans, fontSize: 11, color: T.ink2, lineHeight: 1.6 }}>
                 {status.session.chunksSent} chunk{status.session.chunksSent === 1 ? "" : "s"} uploaded
                 <br />
                 mic {status.session.micIncluded ? "on" : "off"} · tab audio on
@@ -274,8 +254,8 @@ export default function Popup() {
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    fontSize: 11,
-                    color: T.ash,
+                    fontSize: 12,
+                    color: T.ink2,
                     cursor: "pointer",
                   }}
                 >
@@ -283,7 +263,7 @@ export default function Popup() {
                     type="checkbox"
                     checked={status.settings.includeMic}
                     onChange={toggleMic}
-                    style={{ accentColor: T.saffron, cursor: "pointer" }}
+                    style={{ accentColor: T.olive, cursor: "pointer" }}
                   />
                   Include my microphone
                 </label>
@@ -293,9 +273,9 @@ export default function Popup() {
                     style={{
                       background: "none",
                       border: "none",
-                      color: T.saffron,
-                      fontSize: 10,
-                      fontFamily: T.mono,
+                      color: T.olive,
+                      fontSize: 11,
+                      fontFamily: T.sans,
                       cursor: "pointer",
                       textDecoration: "underline",
                       padding: 0,
@@ -333,10 +313,9 @@ export default function Popup() {
               background: "none",
               border: "none",
               padding: 0,
-              fontFamily: T.mono,
-              fontSize: 10,
-              color: T.smoke,
-              letterSpacing: "0.06em",
+              fontFamily: T.sans,
+              fontSize: 11,
+              color: T.ink2,
               cursor: "pointer",
               textAlign: "left",
             }}
@@ -368,12 +347,12 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        width: 300,
+        width: 310,
         minHeight: 180,
-        background: T.ink,
-        color: T.paper,
+        background: T.canvas,
+        color: T.ink,
         fontFamily: T.sans,
-        padding: 16,
+        padding: 18,
         boxSizing: "border-box",
       }}
     >
@@ -387,25 +366,27 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function StatusPill({ state }: { state: PopupStatus["state"] }) {
-  const map: Record<PopupStatus["state"], { label: string; color: string }> = {
-    idle: { label: "READY", color: T.smoke },
-    requesting: { label: "STARTING", color: T.saffron },
-    recording: { label: "RECORDING", color: T.rose },
-    stopping: { label: "STOPPING", color: T.saffron },
-    uploading: { label: "UPLOADING", color: T.saffron },
-    error: { label: "ERROR", color: T.rose },
+  const map: Record<PopupStatus["state"], { label: string; color: string; bg: string }> = {
+    idle: { label: "READY", color: T.ink3, bg: T.paper },
+    requesting: { label: "STARTING", color: T.olive, bg: "#E4E9D7" },
+    recording: { label: "RECORDING", color: T.rose, bg: "#F1E4DF" },
+    stopping: { label: "STOPPING", color: T.olive, bg: "#E4E9D7" },
+    uploading: { label: "UPLOADING", color: T.olive, bg: "#E4E9D7" },
+    error: { label: "ERROR", color: T.rose, bg: "#F1E4DF" },
   };
-  const { label, color } = map[state];
+  const { label, color, bg } = map[state];
   return (
     <span
       style={{
-        fontFamily: T.mono,
-        fontSize: 8,
-        letterSpacing: "0.1em",
+        fontFamily: T.sans,
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: "0.04em",
         color,
-        border: `1px solid ${color}`,
-        borderRadius: 2,
-        padding: "3px 7px",
+        background: bg,
+        border: `1px solid ${T.rule}`,
+        borderRadius: 999,
+        padding: "3px 9px",
       }}
     >
       {label}
@@ -414,22 +395,22 @@ function StatusPill({ state }: { state: PopupStatus["state"] }) {
 }
 
 function Divider() {
-  return <div style={{ height: 1, background: T.rule, margin: "12px 0" }} />;
+  return <div style={{ height: 1, background: T.rule, margin: "14px 0" }} />;
 }
 
 function Note({ tone, children }: { tone: "warn" | "error"; children: React.ReactNode }) {
-  const color = tone === "error" ? T.rose : T.ash;
+  const color = tone === "error" ? T.rose : T.ink2;
   return (
     <div
       style={{
         fontSize: 11,
         lineHeight: 1.6,
         color,
-        background: tone === "error" ? "rgba(225,112,85,0.07)" : T.ink2,
-        border: `1px solid ${tone === "error" ? "rgba(225,112,85,0.22)" : T.rule}`,
-        borderRadius: 3,
-        padding: "9px 11px",
-        marginBottom: 10,
+        background: tone === "error" ? "#F1E4DF" : T.paper,
+        border: `1px solid ${tone === "error" ? "rgba(176,57,43,0.3)" : T.rule}`,
+        borderRadius: 8,
+        padding: "10px 12px",
+        marginBottom: 12,
       }}
     >
       {children}
@@ -448,8 +429,8 @@ function Button({
   disabled?: boolean;
   variant: "primary" | "stop";
 }) {
-  const background = variant === "stop" ? "transparent" : T.saffron;
-  const color = variant === "stop" ? T.rose : "#000";
+  const background = variant === "stop" ? T.paper : T.ink;
+  const color = variant === "stop" ? T.rose : "#FBF9F4";
   return (
     <button
       onClick={onClick}
@@ -459,14 +440,15 @@ function Button({
         background,
         color,
         border: variant === "stop" ? `1px solid ${T.rose}` : "none",
-        borderRadius: 2,
-        padding: "10px 14px",
+        borderRadius: 999,
+        padding: "11px 16px",
         fontFamily: T.sans,
         fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: "0.02em",
+        fontWeight: 500,
+        letterSpacing: "0.01em",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.45 : 1,
+        transition: "background 0.2s",
       }}
     >
       {children}

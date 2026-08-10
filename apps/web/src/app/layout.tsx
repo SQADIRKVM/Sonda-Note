@@ -1,48 +1,61 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Bitter, Schibsted_Grotesk, JetBrains_Mono, Noto_Sans_Malayalam } from "next/font/google";
+import { MotionConfig } from "framer-motion";
+import { SmoothScroll } from "./_motion/smooth-scroll";
 
 import "./globals.css";
 
-const sans = Plus_Jakarta_Sans({
+const fontSlab = Bitter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-grotesk",
+  weight: ["400", "500"],
+  variable: "--font-slab",
   display: "swap",
 });
 
-const mono = JetBrains_Mono({
+const fontUi = Schibsted_Grotesk({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
   variable: "--font-mono",
   display: "swap",
 });
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["300", "400", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-fraunces",
+const fontMl = Noto_Sans_Malayalam({
+  subsets: ["malayalam"],
+  weight: ["400", "500"],
+  variable: "--font-ml",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Sonda Note — Your Conversational Knowledge Engine",
   description:
-    "Transcribes Malayalam + English code-mixed meetings in real time, auto-corrects company jargon, and turns conversations into actionable workflows.",
+    "Turn every meeting into structured, searchable knowledge. Transcribes Malayalam + English code-mixed meetings in real time, auto-corrects company jargon, and delivers grounded insights.",
   applicationName: "Sonda Note",
-  appleWebApp: { capable: true, title: "Sonda Note", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070709",
+  themeColor: "#F7F4EE",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} ${fraunces.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${fontSlab.variable} ${fontUi.variable} ${fontMono.variable} ${fontMl.variable}`}
+    >
+      <body className="bg-sn-canvas text-sn-ink antialiased font-sans">
+        <SmoothScroll />
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      </body>
     </html>
   );
 }

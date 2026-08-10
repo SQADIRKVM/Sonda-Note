@@ -1,0 +1,40 @@
+:root {
+  --cream: #F6F2EA;
+  --paper: #FFFDF8;
+  --sage: #E4E9D7;
+  --butter: #F6EDD6;
+  --blush: #F1E4DF;
+  --ink: #191A14;
+  --ink-2: #4F5248;
+  --ink-3: #6B6E63;
+  --olive: #5F6E24;
+  --lime: #D1E043;
+  --clay: #A64B2A;
+  --line: rgba(25, 26, 20, 0.10);
+  --rule: #DEDEDE;
+
+  /* Legacy sn-* mappings for backwards compatibility */
+  --sn-canvas: var(--cream);
+  --sn-surface: var(--paper);
+  --sn-surface-raised: #F0ECE2;
+  --sn-invert: var(--ink);
+  --sn-hairline: var(--line);
+  --sn-hairline-strong: var(--rule);
+  --sn-ink: var(--ink);
+  --sn-ink-secondary: var(--ink-2);
+  --sn-ink-tertiary: var(--ink-3);
+  --sn-ink-on-invert: #FBF9F4;
+  --sn-accent: var(--olive);
+  --sn-accent-raw: var(--clay);
+  --sn-accent-tint: var(--sage);
+  --sn-live: var(--olive);
+  --sn-live-raw: var(--lime);
+  --sn-live-tint: var(--sage);
+  --sn-alert: var(--clay);
+  --sn-alert-tint: var(--blush);
+  --sn-link: var(--olive);
+
+  --display: Georgia, "Iowan Old Style", serif;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --row: 5rem;
+}

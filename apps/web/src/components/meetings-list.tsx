@@ -6,13 +6,6 @@ import { AlertCircle } from "lucide-react";
 import { formatDuration, languageName, type Meeting } from "@/lib/types";
 import { EmptyState, StatusBadge } from "./ui";
 
-/**
- * Meeting list with live status.
- *
- * Polls while anything is mid-pipeline so a recording started from the extension
- * advances (queued → processing → ready) without a manual refresh. Polling stops
- * once everything settles, so an idle dashboard makes no requests.
- */
 export function MeetingsList({
   initialMeetings,
   onRefresh,
@@ -36,8 +29,8 @@ export function MeetingsList({
         title="No meetings yet"
         body="Open a Google Meet call, click the Sonda Note extension, and hit record. Your transcript will show up here when processing finishes."
         action={
-          <p className="font-mono text-[10px] leading-relaxed text-neutral-500 tracking-wider">
-            GOOGLE MEET ONLY · ZOOM AND TEAMS DESKTOP CAPTURES ARE NOT SUPPORTED FROM BROWSER TABS
+          <p className="font-sans text-xs text-sn-ink-tertiary">
+            Google Meet extension recording · Private, isolated, and instant
           </p>
         }
       />
@@ -45,20 +38,20 @@ export function MeetingsList({
   }
 
   return (
-    <div className="bg-[#121216]/50 border border-white/10 rounded-2xl shadow-xl overflow-hidden divide-y divide-white/5">
+    <div className="bg-sn-surface border border-sn-hairline rounded-[14px] overflow-hidden divide-y divide-sn-hairline shadow-sm">
       {initialMeetings.map((meeting) => (
         <Link
           key={meeting.id}
           href={`/meetings/${meeting.id}`}
-          className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 px-6 py-5 transition-all duration-200 hover:bg-white/5"
+          className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-5 sm:px-8 sm:py-5.5 transition-colors duration-150 hover:bg-sn-surface-raised group"
         >
           <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="truncate font-sans text-base font-bold text-white hover:text-[#FF6B00] transition-colors">
+            <div className="truncate font-serif text-xl font-normal text-sn-ink group-hover:text-sn-accent transition-colors leading-snug">
               {meeting.title}
             </div>
-            
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-neutral-500 uppercase tracking-wider">
-              <span className="text-neutral-400">
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-xs text-sn-ink-secondary">
+              <span>
                 {new Date(meeting.created_at).toLocaleString("en-IN", {
                   day: "numeric",
                   month: "short",
@@ -69,34 +62,34 @@ export function MeetingsList({
               <span>·</span>
               {meeting.duration_secs ? (
                 <>
-                  <span className="text-neutral-400">{formatDuration(meeting.duration_secs)}</span>
+                  <span>{formatDuration(meeting.duration_secs)}</span>
                   <span>·</span>
                 </>
               ) : null}
               {meeting.language ? (
                 <>
-                  <span className="text-[#6366F1] font-semibold">{languageName(meeting.language)}</span>
+                  <span className="text-sn-live font-medium">{languageName(meeting.language)}</span>
                   <span>·</span>
                 </>
               ) : null}
               {meeting.speaker_count ? (
-                <span className="text-neutral-400">
+                <span>
                   {meeting.speaker_count} speaker{meeting.speaker_count === 1 ? "" : "s"}
                 </span>
               ) : null}
             </div>
 
             {meeting.status === "failed" && meeting.error_message && (
-              <div className="mt-2.5 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 flex items-center gap-2 max-w-xl">
-                <AlertCircle className="h-3.5 w-3.5 text-red-400 shrink-0" />
-                <p className="text-[11px] leading-relaxed text-red-400 font-sans font-normal">
+              <div className="mt-3 rounded-[10px] border border-sn-alert/30 bg-sn-alert-tint px-3.5 py-2.5 flex items-center gap-2.5 max-w-xl">
+                <AlertCircle className="h-4 w-4 text-sn-alert shrink-0" />
+                <p className="text-xs text-sn-alert font-sans leading-relaxed">
                   {meeting.error_message}
                 </p>
               </div>
             )}
           </div>
-          
-          <div className="shrink-0">
+
+          <div className="shrink-0 self-center">
             <StatusBadge status={meeting.status} />
           </div>
         </Link>

@@ -2,14 +2,11 @@
 
 import { clsx } from "clsx";
 import { useMemo, useState } from "react";
-import { Search, Edit3, Save, X } from "lucide-react";
+import { Search, Edit3, Save } from "lucide-react";
 import { ApiError, correctSegment } from "@/lib/api";
 import { formatTimestamp, type TranscriptSegment } from "@/lib/types";
 import { Button, Card, Spinner } from "./ui";
 
-/**
- * Transcript with inline correction — the moat's feedback loop.
- */
 export function TranscriptView({
   segments,
   onSegmentsChange,
@@ -76,8 +73,8 @@ export function TranscriptView({
 
   if (segments.length === 0) {
     return (
-      <Card className="py-12 text-center border border-white/10 bg-[#121216]/50 rounded-2xl">
-        <p className="text-sm text-neutral-400 font-sans">
+      <Card className="py-12 text-center">
+        <p className="text-xs text-sn-ink-tertiary font-sans">
           No transcript yet. It appears here once processing finishes.
         </p>
       </Card>
@@ -85,32 +82,32 @@ export function TranscriptView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Search and Auto-Learn Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-[#121216]/30 border border-white/5 p-3 rounded-2xl">
+      <div className="flex flex-wrap items-center gap-4 bg-sn-surface border border-sn-hairline p-3 rounded-[12px]">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-neutral-500" />
+          <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-sn-ink-tertiary" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search this transcript…"
-            className="w-full rounded-full border border-white/10 bg-[#070709] pl-10 pr-4 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-[#FF6B00]/50 outline-none transition-all"
+            className="w-full rounded-full border border-sn-hairline bg-sn-surface-raised pl-9 pr-4 py-1.5 text-xs text-sn-ink placeholder:text-sn-ink-tertiary focus:border-sn-hairline-strong outline-none transition-colors"
           />
         </div>
-        
-        <label className="flex cursor-pointer items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-neutral-500 font-bold select-none">
+
+        <label className="flex cursor-pointer items-center gap-2 font-sans text-xs text-sn-ink-secondary select-none">
           <input
             type="checkbox"
             checked={learnVocabulary}
             onChange={(e) => setLearnVocabulary(e.target.checked)}
-            className="h-3.5 w-3.5 cursor-pointer accent-[#FF6B00]"
+            className="h-3.5 w-3.5 rounded border-sn-hairline text-sn-accent accent-sn-accent cursor-pointer"
           />
           <span>Auto-learn corrections</span>
         </label>
       </div>
 
       {query && (
-        <p className="font-mono text-[9px] uppercase tracking-wider text-neutral-500 font-bold">
+        <p className="font-sans text-xs text-sn-ink-tertiary">
           Found {filtered.length} of {segments.length} matches
         </p>
       )}
@@ -125,36 +122,36 @@ export function TranscriptView({
             <div
               key={segment.id}
               className={clsx(
-                "group border px-5 py-4 transition-all duration-200 rounded-2xl",
-                editing 
-                  ? "border-[#FF6B00]/30 bg-[#FF6B00]/5 shadow-lg shadow-[#FF6B00]/5" 
-                  : "border-white/5 bg-[#121216]/30 hover:border-white/10 hover:bg-[#121216]/50"
+                "group border px-5 py-4 transition-colors duration-150 rounded-[12px] bg-sn-surface",
+                editing
+                  ? "border-sn-hairline-strong bg-sn-surface-raised"
+                  : "border-sn-hairline hover:border-sn-hairline-strong"
               )}
             >
               {/* Meta information row */}
-              <div className="mb-2 flex items-center gap-3 font-mono text-[9px] uppercase tracking-wider font-extrabold select-none">
-                <span className="text-[#FF6B00]">{segment.speaker}</span>
-                <span className="text-neutral-500">{formatTimestamp(segment.start_secs)}</span>
+              <div className="mb-2 flex items-center gap-3 font-sans text-xs select-none">
+                <span className="text-sn-ink font-medium">{segment.speaker}</span>
+                <span className="text-sn-ink-tertiary">{formatTimestamp(segment.start_secs)}</span>
                 {corrected && !editing && (
                   <span
-                    className="text-[#00B894] border border-[#00B894]/20 bg-[#00B894]/10 rounded px-1.5 py-0.5 text-[8px] font-extrabold"
+                    className="text-sn-live bg-sn-live-tint border border-sn-live/20 rounded px-1.5 py-0.5 text-[10px] font-medium"
                     title={`Original ASR output: ${segment.raw_text}`}
                   >
                     cleaned
                   </span>
                 )}
                 {segment.edited_at && !editing && (
-                  <span className="text-[#6366F1] border border-[#6366F1]/20 bg-[#6366F1]/10 rounded px-1.5 py-0.5 text-[8px] font-extrabold">
+                  <span className="text-sn-accent bg-sn-accent-tint border border-sn-accent/20 rounded px-1.5 py-0.5 text-[10px] font-medium">
                     edited
                   </span>
                 )}
                 {!editing && (
                   <button
                     onClick={() => startEdit(segment)}
-                    className="ml-auto flex items-center gap-1 text-neutral-500 opacity-0 transition-opacity hover:text-white group-hover:opacity-100 font-bold text-[9px]"
+                    className="ml-auto flex items-center gap-1 text-sn-ink-tertiary opacity-0 transition-opacity hover:text-sn-ink group-hover:opacity-100 font-sans text-xs"
                   >
                     <Edit3 className="h-3 w-3" />
-                    <span>EDIT</span>
+                    <span>Edit</span>
                   </button>
                 )}
               </div>
@@ -174,10 +171,10 @@ export function TranscriptView({
                     }}
                     rows={Math.max(2, Math.ceil(draft.length / 90))}
                     autoFocus
-                    className="w-full resize-y rounded-xl border border-white/10 bg-[#070709] px-4 py-3.5 text-sm leading-relaxed text-white focus:border-[#FF6B00]/50 outline-none transition-all"
+                    className="w-full resize-y rounded-[8px] border border-sn-hairline bg-sn-surface px-4 py-3 text-xs leading-relaxed text-sn-ink focus:border-sn-hairline-strong outline-none transition-colors font-sans"
                   />
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button size="sm" onClick={() => void save(segment)} disabled={saving} className="flex items-center gap-1 px-4 py-2">
+                    <Button size="sm" onClick={() => void save(segment)} disabled={saving} className="flex items-center gap-1">
                       {saving ? <Spinner /> : (
                         <>
                           <Save className="h-3.5 w-3.5" />
@@ -185,17 +182,17 @@ export function TranscriptView({
                         </>
                       )}
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={cancelEdit} disabled={saving} className="px-4 py-2">
+                    <Button size="sm" variant="ghost" onClick={cancelEdit} disabled={saving}>
                       Cancel
                     </Button>
-                    <span className="font-mono text-[9px] uppercase tracking-wider text-neutral-500 font-bold select-none">
+                    <span className="font-sans text-xs text-sn-ink-tertiary select-none">
                       Press Enter to save · Escape to cancel
                     </span>
                   </div>
                 </div>
               ) : (
-                <p 
-                  className="text-sm sm:text-base leading-relaxed text-neutral-200 font-sans cursor-pointer select-text" 
+                <p
+                  className="text-sm leading-relaxed text-sn-ink font-sans cursor-pointer select-text"
                   onDoubleClick={() => startEdit(segment)}
                 >
                   {query ? highlight(segment.text, query) : segment.text}
@@ -218,7 +215,7 @@ function highlight(text: string, query: string): React.ReactNode {
 
   return parts.map((part, index) =>
     part.toLowerCase() === needle.toLowerCase() ? (
-      <mark key={index} className="bg-[#FF6B00]/30 text-white rounded px-0.5">
+      <mark key={index} className="bg-sn-accent-tint text-sn-ink rounded px-0.5 font-normal">
         {part}
       </mark>
     ) : (

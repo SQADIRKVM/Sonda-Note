@@ -20,22 +20,21 @@ export default function TasksPage() {
   }, []);
 
   return (
-    <>
+    <div className="space-y-6">
       <SectionHeading kicker="Follow-ups" title="Action items" />
-      <p className="mb-8 max-w-[560px] text-[13px] leading-[1.8] text-ash">
-        Every commitment extracted from your meetings, grouped by owner. This is what users actually
-        pay for — not ASR accuracy.
+      <p className="max-w-[560px] text-xs leading-relaxed text-sn-ink-secondary font-sans -mt-4">
+        Every commitment extracted from your meetings, grouped by owner.
       </p>
 
-      {error && <p className="text-[13px] text-rose">{error}</p>}
+      {error && <p className="text-xs text-sn-alert font-sans">{error}</p>}
 
       {!error && !tasks && (
-        <div className="flex justify-center py-16 text-smoke">
+        <div className="flex justify-center py-16 text-sn-ink-tertiary">
           <Spinner />
         </div>
       )}
 
       {tasks && <TasksBoard initialTasks={tasks} />}
-    </>
+    </div>
   );
 }

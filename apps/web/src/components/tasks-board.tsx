@@ -20,7 +20,6 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
     [tasks, filter]
   );
 
-  /** Group by owner so a standup can be read one person at a time. */
   const grouped = useMemo(() => {
     const map = new Map<string, ActionItem[]>();
     for (const task of visible) {
@@ -29,7 +28,6 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
       list.push(task);
       map.set(owner, list);
     }
-    // Named owners first, alphabetically; Unassigned last.
     return [...map.entries()].sort(([a], [b]) => {
       if (a === UNASSIGNED) return 1;
       if (b === UNASSIGNED) return -1;
@@ -64,9 +62,9 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
   }
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Category Filters in Rounded Pill Badges */}
-      <div className="mb-8 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         {(
           [
             ["open", `Open · ${openCount}`],
@@ -78,10 +76,10 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
             key={value}
             onClick={() => setFilter(value)}
             className={clsx(
-              "rounded-full px-4 py-1.5 font-mono text-[10px] uppercase tracking-wider font-semibold border transition-all",
-              filter === value 
-                ? "bg-[#FF6B00]/10 border-[#FF6B00]/30 text-[#FF6B00]" 
-                : "border-white/10 text-neutral-400 hover:text-white"
+              "rounded-full px-4 py-1 font-sans text-xs font-medium transition-all select-none",
+              filter === value
+                ? "bg-sn-invert text-sn-ink-on-invert"
+                : "bg-sn-surface border border-sn-hairline text-sn-ink-secondary hover:text-sn-ink hover:border-sn-hairline-strong"
             )}
           >
             {label}
@@ -90,70 +88,71 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <Card className="py-12 text-center border border-white/10 bg-[#121216]/50 rounded-2xl">
-          <p className="text-sm text-neutral-400 font-sans">
+        <Card className="py-12 text-center">
+          <p className="text-xs text-sn-ink-tertiary font-sans">
             {filter === "open" ? "Nothing open. Everything is done." : "Nothing here."}
           </p>
         </Card>
       ) : (
         <div className="space-y-6">
           {grouped.map(([owner, ownerTasks]) => (
-            <div key={owner} className="space-y-3">
-              <div className="flex items-center gap-3">
+            <div key={owner} className="space-y-2.5">
+              <div className="flex items-center gap-2">
                 <span
                   className={clsx(
-                    "font-mono text-[10px] uppercase tracking-wider font-extrabold",
-                    owner === UNASSIGNED ? "text-neutral-500" : "text-[#00B894]"
+                    "font-sans text-xs font-medium",
+                    owner === UNASSIGNED ? "text-sn-ink-tertiary" : "text-sn-live"
                   )}
                 >
                   {owner}
                 </span>
-                <span className="font-mono text-[9px] font-bold bg-white/5 border border-white/10 rounded-full px-2 py-0.5 text-neutral-400">
+                <span className="font-sans text-[11px] bg-sn-surface border border-sn-hairline rounded-full px-2 py-0.5 text-sn-ink-tertiary">
                   {ownerTasks.length}
                 </span>
-                <span className="h-px flex-1 bg-white/10" />
+                <span className="h-px flex-1 bg-sn-hairline" />
               </div>
 
-              {/* Glass container with divide lines between rows */}
-              <div className="bg-[#121216]/50 border border-white/10 rounded-2xl shadow-xl overflow-hidden divide-y divide-white/5">
+              {/* Surface card with divide lines between rows */}
+              <div className="bg-sn-surface border border-sn-hairline rounded-[12px] overflow-hidden divide-y divide-sn-hairline">
                 {ownerTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-white/5"
+                    className="flex items-start gap-3.5 px-5 py-3.5 transition-colors hover:bg-sn-surface-raised"
                   >
-                    <div 
+                    <div
                       onClick={() => void toggle(task)}
-                      className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-white/20 transition-all cursor-pointer select-none"
-                      style={{ 
-                        backgroundColor: task.status === "done" ? "#00B894" : "transparent",
-                        borderColor: task.status === "done" ? "#00B894" : "rgba(255,255,255,0.2)"
-                      }}
+                      className={clsx(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors cursor-pointer select-none",
+                        task.status === "done"
+                          ? "bg-sn-live border-sn-live text-white"
+                          : "border-sn-hairline-strong hover:border-sn-ink"
+                      )}
                     >
-                      {task.status === "done" && <Check className="h-3 w-3 stroke-[3] text-black" />}
+                      {task.status === "done" && <Check className="h-3 w-3 stroke-[3]" />}
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">
                       <p
                         className={clsx(
-                          "text-sm leading-relaxed font-sans",
-                          task.status === "done" ? "text-neutral-500 line-through" : "text-white"
+                          "text-xs leading-relaxed font-sans",
+                          task.status === "done" ? "text-sn-ink-tertiary line-through" : "text-sn-ink"
                         )}
                       >
                         {task.text}
                       </p>
-                      
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[9px] uppercase tracking-wider text-neutral-500 font-bold">
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[11px] text-sn-ink-tertiary">
                         {task.due_hint && (
-                          <span className="text-[#FF6B00] border border-[#FF6B00]/20 bg-[#FF6B00]/10 rounded px-1.5 py-0.5">
-                            DUE: {task.due_hint}
+                          <span className="text-sn-accent font-medium">
+                            Due: {task.due_hint}
                           </span>
                         )}
                         {task.meetings && (
                           <Link
                             href={`/meetings/${task.meetings.id}`}
-                            className="truncate text-neutral-400 hover:text-[#FF6B00] transition-colors"
+                            className="truncate hover:text-sn-ink transition-colors"
                           >
-                            MEETING: {task.meetings.title}
+                            Meeting: {task.meetings.title}
                           </Link>
                         )}
                       </div>
@@ -167,6 +166,6 @@ export function TasksBoard({ initialTasks }: { initialTasks: ActionItem[] }) {
       )}
 
       {toast && <Toast message={toast} tone="error" />}
-    </>
+    </div>
   );
 }

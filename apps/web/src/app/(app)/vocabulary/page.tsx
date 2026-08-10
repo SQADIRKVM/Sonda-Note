@@ -22,22 +22,22 @@ export default function VocabularyPage() {
   }, []);
 
   return (
-    <>
+    <div className="space-y-6">
       <SectionHeading kicker="The moat" title="Workspace vocabulary" />
 
-      <p className="mb-8 max-w-[560px] text-sm leading-relaxed text-neutral-400">
-        Every correction here applies to all future meetings in {workspaceName}. Every team has its own specific vocabulary, brand terms, and product names — this is the layer a generic ASR engine cannot replicate for you.
+      <p className="max-w-[560px] text-xs leading-relaxed text-sn-ink-secondary font-sans -mt-4">
+        Every correction here applies to all future meetings in {workspaceName}. Spells your product names, team jargon, and brand terms correctly.
       </p>
 
-      {error && <p className="text-[13px] text-rose">{error}</p>}
+      {error && <p className="text-xs text-sn-alert font-sans">{error}</p>}
 
       {!error && !data && (
-        <div className="flex justify-center py-16 text-smoke">
+        <div className="flex justify-center py-16 text-sn-ink-tertiary">
           <Spinner />
         </div>
       )}
 
       {data && <VocabularyManager initialTerms={data.terms} industry={data.industry} />}
-    </>
+    </div>
   );
 }
